@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compounding Income Calculator</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 40px;
+            padding: 40px;
+        }
+
+        .input-section {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+        }
+
+        .input-section h2 {
+            color: #667eea;
+            margin-bottom: 25px;
+            font-size: 1.5em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+            font-size: 0.95em;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .calculate-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .calculate-btn:active {
+            transform: translateY(0);
+        }
+
+        .results-section {
+            display: none;
+        }
+
+        .results-section.active {
+            display: block;
+        }
+
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 25px;
+            border-radius: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .summary-card h3 {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .summary-card p {
+            font-size: 2em;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .chart-container {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            height: 350px;
+        }
+
+        .table-container {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            overflow-x: auto;
+        }
+
+        .table-container h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: right;
+        }
+
+        th:first-child, td:first-child {
+            text-align: left;
+        }
+
+        th {
+            font-weight: 600;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        tbody tr:hover {
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        td {
+            color: #555;
+        }
+
+        .error-message {
+            background: #fee;
+            border: 2px solid #fcc;
+            color: #c33;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .error-message.active {
+            display: block;
+        }
+
+        @media (max-width: 968px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+
+            .summary {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .chart-container {
+                height: 300px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .content {
+                padding: 20px;
+            }
+
+            .input-section {
+                padding: 20px;
+            }
+
+            .header {
+                padding: 30px 20px;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            table {
+                font-size: 0.9em;
+            }
+
+            th, td {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💰 Compounding Income Calculator</h1>
+            <p>See how your money grows with the power of compounding</p>
+        </div>
+
+        <div class="content">
+            <!-- Input Section -->
+            <div class="input-section">
+                <h2>Enter Your Details</h2>
+
+                <div class="error-message" id="errorMessage"></div>
+
+                <form id="calculatorForm">
+                    <div class="form-group">
+                        <label for="principal">Initial Amount ($)</label>
+                        <input
+                            type="number"
+                            id="principal"
+                            placeholder="e.g., 100000"
+                            min="0"
+                            step="0.01"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contribution">Monthly Contribution ($)</label>
+                        <input
+                            type="number"
+                            id="contribution"
+                            placeholder="e.g., 10000"
+                            min="0"
+                            step="0.01"
+                            value="0"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="rate">Annual Interest Rate (%)</label>
+                        <input
+                            type="number"
+                            id="rate"
+                            placeholder="e.g., 12"
+                            min="0"
+                            step="0.01"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="frequency">Compounding Frequency</label>
+                        <select id="frequency">
+                            <option value="12">Monthly</option>
+                            <option value="4">Quarterly</option>
+                            <option value="1">Yearly</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="duration">Duration (Years)</label>
+                        <input
+                            type="number"
+                            id="duration"
+                            placeholder="e.g., 10"
+                            min="1"
+                            step="1"
+                        >
+                    </div>
+
+                    <button type="submit" class="calculate-btn">Calculate Growth</button>
+                </form>
+            </div>
+
+            <!-- Results Section -->
+            <div class="results-section" id="resultsSection">
+                <div class="summary" id="summary"></div>
+
+                <div class="chart-container">
+                    <canvas id="growthChart"></canvas>
+                </div>
+
+                <div class="table-container">
+                    <h3>Year-by-Year Breakdown</h3>
+                    <table id="breakdownTable">
+                        <thead>
+                            <tr>
+                                <th>Year</th>
+                                <th>Total Invested</th>
+                                <th>Interest Earned</th>
+                                <th>End Balance</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global chart instance
+        let growthChart = null;
+
+        // Format currency
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(amount);
+        }
+
+        // Validate inputs
+        function validateInputs(principal, rate, duration) {
+            if (principal === '' || principal < 0) {
+                return 'Please enter a valid initial amount (must be 0 or greater).';
+            }
+            if (rate === '' || rate < 0) {
+                return 'Please enter a valid interest rate (must be 0 or greater).';
+            }
+            if (duration === '' || duration <= 0) {
+                return 'Please enter a valid duration (must be greater than 0).';
+            }
+            return null;
+        }
+
+        // Show error message
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.classList.add('active');
+        }
+
+        // Hide error message
+        function hideError() {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.classList.remove('active');
+        }
+
+        /**
+         * Calculate compound interest with recurring contributions
+         *
+         * @param {number} principal - Initial investment amount
+         * @param {number} monthlyContribution - Recurring monthly contribution
+         * @param {number} annualRate - Annual interest rate (as percentage, e.g., 12 for 12%)
+         * @param {number} compoundingFrequency - Number of times interest compounds per year
+         * @param {number} years - Total duration in years
+         * @returns {object} Calculation results including year-by-year breakdown
+         */
+        function calculateCompounding(principal, monthlyContribution, annualRate, compoundingFrequency, years) {
+            const r = annualRate / 100; // Convert percentage to decimal
+            const n = compoundingFrequency;
+            const yearlyData = [];
+
+            let currentBalance = principal;
+            let totalContributions = principal;
+
+            for (let year = 1; year <= years; year++) {
+                let yearStartBalance = currentBalance;
+                let yearContributions = 0;
+
+                // Process each compounding period in the year
+                const periodsInYear = n;
+                const monthsPerPeriod = 12 / n;
+
+                for (let period = 0; period < periodsInYear; period++) {
+                    // Add monthly contributions for this period
+                    const contributionsThisPeriod = monthlyContribution * monthsPerPeriod;
+                    currentBalance += contributionsThisPeriod;
+                    yearContributions += contributionsThisPeriod;
+                    totalContributions += contributionsThisPeriod;
+
+                    // Apply compound interest for this period
+                    currentBalance = currentBalance * (1 + r / n);
+                }
+
+                const yearEndBalance = currentBalance;
+                const interestEarned = yearEndBalance - yearStartBalance - yearContributions;
+
+                yearlyData.push({
+                    year: year,
+                    totalInvested: totalContributions,
+                    interestEarned: interestEarned,
+                    balance: yearEndBalance
+                });
+            }
+
+            const finalBalance = currentBalance;
+            const totalInterest = finalBalance - totalContributions;
+
+            return {
+                finalBalance: finalBalance,
+                totalContributions: totalContributions,
+                totalInterest: totalInterest,
+                yearlyData: yearlyData
+            };
+        }
+
+        /**
+         * Update the summary cards with calculation results
+         */
+        function updateSummary(results) {
+            const summaryDiv = document.getElementById('summary');
+            summaryDiv.innerHTML = `
+                <div class="summary-card">
+                    <h3>Final Amount</h3>
+                    <p>${formatCurrency(results.finalBalance)}</p>
+                </div>
+                <div class="summary-card">
+                    <h3>Total Invested</h3>
+                    <p>${formatCurrency(results.totalContributions)}</p>
+                </div>
+                <div class="summary-card">
+                    <h3>Interest Earned</h3>
+                    <p>${formatCurrency(results.totalInterest)}</p>
+                </div>
+            `;
+        }
+
+        /**
+         * Update the year-by-year breakdown table
+         */
+        function updateTable(yearlyData) {
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = '';
+
+            yearlyData.forEach(data => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>Year ${data.year}</td>
+                    <td>${formatCurrency(data.totalInvested)}</td>
+                    <td>${formatCurrency(data.interestEarned)}</td>
+                    <td>${formatCurrency(data.balance)}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        /**
+         * Update the growth chart
+         */
+        function updateChart(yearlyData) {
+            const ctx = document.getElementById('growthChart').getContext('2d');
+
+            // Destroy existing chart if it exists
+            if (growthChart) {
+                growthChart.destroy();
+            }
+
+            const labels = yearlyData.map(d => `Year ${d.year}`);
+            const balances = yearlyData.map(d => d.balance);
+            const invested = yearlyData.map(d => d.totalInvested);
+
+            growthChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Total Balance',
+                            data: balances,
+                            borderColor: '#667eea',
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Total Invested',
+                            data: invested,
+                            borderColor: '#764ba2',
+                            backgroundColor: 'rgba(118, 75, 162, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4,
+                            borderDash: [5, 5]
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    size: 12,
+                                    family: 'Inter, sans-serif'
+                                },
+                                padding: 15,
+                                usePointStyle: true
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            titleFont: {
+                                size: 14
+                            },
+                            bodyFont: {
+                                size: 13
+                            },
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    label += formatCurrency(context.parsed.y);
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value.toLocaleString();
+                                },
+                                font: {
+                                    size: 11
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                font: {
+                                    size: 11
+                                }
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        /**
+         * Handle form submission
+         */
+        document.getElementById('calculatorForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            hideError();
+
+            // Get input values
+            const principal = parseFloat(document.getElementById('principal').value) || 0;
+            const contribution = parseFloat(document.getElementById('contribution').value) || 0;
+            const rate = parseFloat(document.getElementById('rate').value);
+            const frequency = parseInt(document.getElementById('frequency').value);
+            const duration = parseInt(document.getElementById('duration').value);
+
+            // Validate inputs
+            const error = validateInputs(principal, rate, duration);
+            if (error) {
+                showError(error);
+                return;
+            }
+
+            if (contribution < 0) {
+                showError('Monthly contribution cannot be negative.');
+                return;
+            }
+
+            // Calculate results
+            const results = calculateCompounding(principal, contribution, rate, frequency, duration);
+
+            // Update UI
+            updateSummary(results);
+            updateTable(results.yearlyData);
+            updateChart(results.yearlyData);
+
+            // Show results section
+            document.getElementById('resultsSection').classList.add('active');
+
+            // Scroll to results on mobile
+            if (window.innerWidth <= 968) {
+                document.getElementById('resultsSection').scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+
+        // Set default values for demo
+        window.addEventListener('load', function() {
+            document.getElementById('principal').value = '100000';
+            document.getElementById('contribution').value = '10000';
+            document.getElementById('rate').value = '12';
+            document.getElementById('duration').value = '10';
+        });
+    </script>
+</body>
+</html>
