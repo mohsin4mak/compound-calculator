@@ -136,11 +136,19 @@
             margin-bottom: 30px;
         }
 
+        @media (min-width: 969px) and (max-width: 1200px) {
+            .summary-card p {
+                font-size: 1.6em;
+            }
+        }
+
         .summary-card {
             background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
             padding: 25px;
             border-radius: 15px;
             border-left: 4px solid #667eea;
+            min-width: 0;
+            overflow: hidden;
         }
 
         .summary-card h3 {
@@ -152,9 +160,12 @@
         }
 
         .summary-card p {
-            font-size: 2em;
+            font-size: 1.8em;
             font-weight: 700;
             color: #667eea;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            line-height: 1.2;
         }
 
         .chart-container {
@@ -194,6 +205,8 @@
         th, td {
             padding: 15px;
             text-align: right;
+            word-break: break-word;
+            overflow-wrap: break-word;
         }
 
         th:first-child, td:first-child {
@@ -292,8 +305,9 @@
             }
 
             .summary-card p {
-                font-size: 1.6em;
+                font-size: 1.4em;
                 word-break: break-word;
+                overflow-wrap: break-word;
             }
 
             .chart-container {
@@ -333,12 +347,16 @@
         }
 
         @media (max-width: 400px) {
+            .summary-card {
+                padding: 15px;
+            }
+
             .summary-card p {
-                font-size: 1.4em;
+                font-size: 1.2em;
             }
 
             table {
-                font-size: 0.75em;
+                font-size: 0.7em;
             }
 
             th, td {
@@ -348,6 +366,17 @@
             .chart-container {
                 height: 200px;
                 min-height: 180px;
+            }
+        }
+
+        /* Handle very large numbers on all screen sizes */
+        @media (max-width: 768px) {
+            .summary {
+                grid-template-columns: 1fr;
+            }
+
+            .summary-card p {
+                font-size: 1.5em;
             }
         }
     </style>
